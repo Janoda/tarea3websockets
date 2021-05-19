@@ -10,6 +10,8 @@ import ListItem from '@material-ui/core/ListItem';
 import { ListItemText } from '@material-ui/core';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
+
 
 // const socket = io("wss://tarea-3-websocket.2021-1.tallerdeintegracion.cl/", {
 //   transports: ['websocket']  // forces websockets only
@@ -46,6 +48,21 @@ function App() {
       console.log(flights, "vuelos y largo:", flights.length)
       
     };
+    
+    const listenerChat = (pos) => {
+
+      setMessages((prevState)=>{
+        const p1 = [...prevState]
+        p1.push(pos)
+        return[...p1]
+        
+      })
+      
+      
+      
+    };
+
+
     const listenerPositions = (pos) => {
       // if (!(position[0] in Object.keys(positions))){
       //console.log(position)
@@ -77,46 +94,30 @@ function App() {
     socket.on('FLIGHTS', listenerFlights);
     socket.emit("FLIGHTS")
     socket.on('POSITION', listenerPositions);
+    socket.on("CHAT", listenerChat)
  
     return () => {
       socket.off('FLIGHTS', listenerFlights);
       socket.off('POSITION', listenerPositions);
       console.log("SALIEDNO")
+      socket.off("CHAT", listenerChat)
     };
  }, []);
 
 
-  // socket.on("POSITION", (...args) => {
-  //   console.log(args[0], "POSITION")
-  // });
-  // socket.on("FLIGHTS", (...args) => {
-  //   console.log(args)
-  //   setFlights([1,2,4,5])
-  //   console.log(flights, "vuelos y largo: ", flights.length)
-    
-  // });
-  // socket.on("CHAT", (...args) => {
-  //   console.log('CHAT')
-  // });
-  // console.log(flights.length)
-  // if (flights.length === 0){
-  //   console.log("ENTRE")
-    
-    
-  // }
-  const position = [51.505, -0.09]
+  const position = [-34.82264, -58.533321]
   const handleSend = ()=>{
     console.log({"name": nick, "message": send})
     setSend("")
-    //socket.emit("CHAT", {"name": nick, "message": send})
+    socket.emit("CHAT", {"name": nick, "message": send})
   }
   
   const colors = [{color: "blue", dashArray: "12"}, { color: 'lime' , dashArray: "20"}, { color: 'purple' ,dashArray: "18"}, { color: 'yellow' , dashArray: "13"}]
   return (
     <div className="App">
       <Grid container spacing={3}>
-        <Grid item xs={8}>
-          <MapContainer center={position} zoom={2} scrollWheelZoom={false} style={{ height: '100vh', width: '100wh' }}>
+        <Grid item xs={8} style={{maxHeight: 400, overflow: 'auto'}}>
+          <MapContainer center={position} zoom={3} scrollWheelZoom={true} style={{ height: '100vh', width: '100wh' }}>
             <TileLayer
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -142,27 +143,71 @@ function App() {
           </MapContainer>
         </Grid>
         <Grid item xs={4}>
-        <TextField id="standard-basic" value={nick} label="Nickname" onChange={(e)=>setNick(e.target.value)}/>
 
-          <List>
-            <ListItem>
-              <ListItemText primary= "TESTEO" secondary="DENUEVO">
+          <List style={{maxHeight: '400px', overflow: 'auto'}}>
+            
+            {messages.map((el)=>{
+              return <ListItem>
+              <ListItemText primary= {el.message} secondary={el.name+"@"+el.date}>
 
               </ListItemText>
             </ListItem>
+            })}
           </List>
+          <TextField id="standard-basic" value={nick} label="Nickname" onChange={(e)=>setNick(e.target.value)}/>
+
           <TextField id="standard-basic" value={send} label="Mensaje" onChange={(e)=>setSend(e.target.value)}/>
           <Button variant="contained" onClick={handleSend}>Enviar</Button>
-          <p>{send}</p>
+
         </Grid>
-        <Grid item xs={8}>
-          <p> asd</p>
+        <Grid item xs={8} style={{maxHeight: 400, overflow: 'auto', maxWidth:'50%'}}>
+         {flights.map((el)=>{
+           let pass = ""
+           el.passengers.forEach((el2)=>{
+             pass += el2.name
+             pass += ", \n"
+           })
+          //  console.log("AOASo", el.passengers)
+          //  for (const key in el.passengers) {
+          //    //console.log("ASDASD")
+          //    //console.log(key)
+          //    pass += key.name
+          //    pass += '\n'
+          //  }
+           return (
+           <Paper style={{maxHeight: 200, overflow: 'auto'}}>
+             <List>
+              <ListItem>
+              <ListItemText primary={"Nombre Avion: " + el.plane} />
+              </ListItem>
+              <ListItem>
+              <ListItemText primary={"Aerolinea: " + el.airline} />
+              </ListItem>
+              <ListItem>
+              <ListItemText primary={"Codigo: " + el.code} />
+              </ListItem>
+              <ListItem>
+              <ListItemText primary={"Asientos: " + el.seats} />
+              </ListItem>
+              <ListItem>
+              <ListItemText primary={"Origen: " + el.origin} />
+              </ListItem>
+              <ListItem>
+              <ListItemText primary={"Destino: " + el.destination} />
+              </ListItem>
+              <ListItem>
+              <ListItemText primary={"Pasajeros"} secondary={pass} />
+              </ListItem>
+             </List>
+             </Paper>
+             )
+         })}
         </Grid>
         
       </Grid>
       
       {/* <p>{positions["INT470"][0]?positions["INT470"][0]:"asd"}</p> */}
-      <p>HOLA</p>
+
 
     </div>
   );
