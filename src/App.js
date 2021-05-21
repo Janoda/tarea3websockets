@@ -92,7 +92,7 @@ function App() {
     };
     console.log("USE EFFECT")
     socket.on('FLIGHTS', listenerFlights);
-    socket.emit("FLIGHTS")
+    //socket.emit("FLIGHTS")
     socket.on('POSITION', listenerPositions);
     socket.on("CHAT", listenerChat)
  
@@ -110,6 +110,9 @@ function App() {
     console.log({"name": nick, "message": send})
     setSend("")
     socket.emit("CHAT", {"name": nick, "message": send})
+  }
+  const handleGetinfo = ()=>{
+    socket.emit("FLIGHTS")
   }
   
   const colors = [{color: "blue", dashArray: "12"}, { color: 'lime' , dashArray: "20"}, { color: 'purple' ,dashArray: "18"}, { color: 'yellow' , dashArray: "13"}]
@@ -160,6 +163,8 @@ function App() {
           <Button variant="contained" onClick={handleSend}>Enviar</Button>
 
         </Grid>
+        <Button variant="contained" onClick={handleGetinfo}>Get Info</Button>
+
         <Grid item xs={8} style={{maxHeight: 400, overflow: 'auto', maxWidth:'50%'}}>
          {flights.map((el)=>{
            let pass = ""
