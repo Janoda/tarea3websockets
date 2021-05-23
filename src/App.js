@@ -151,7 +151,7 @@ function App() {
             
             {messages.map((el)=>{
               return <ListItem>
-              <ListItemText primary= {el.message} secondary={el.name+"@"+el.date}>
+              <ListItemText primary= {el.message} secondary={el.name+"@"+ new Date(el.date)}>
 
               </ListItemText>
             </ListItem>
